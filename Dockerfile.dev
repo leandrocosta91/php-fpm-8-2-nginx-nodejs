@@ -2,9 +2,6 @@ FROM php:8.2-fpm
 
 WORKDIR /var/www
 
-RUN curl -sL https://deb.nodesource.com/setup_18.x -o nodesource_setup.sh
-RUN ["sh",  "./nodesource_setup.sh"]
-
 RUN apt-get update \
 	# gd
 	&& apt-get install -y \
@@ -29,7 +26,6 @@ RUN apt-get update \
 	gifsicle \
 	locales \
 	libonig-dev \
-	nodejs \
 	nginx \
 	&& docker-php-ext-configure gd --enable-gd --with-freetype --with-jpeg \
 	&& docker-php-ext-install gd \
@@ -56,6 +52,12 @@ RUN apt-get update \
 	&& rm -rf /var/lib/apt/lists/* \
 	&& rm -rf /tmp/pear/
 
+RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - && \
+	apt-get install -y nodejs && \
+	npm install -g npm@latest && \
+	npm install -g yarn
+
+
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
 	&& php composer-setup.php \
 	&& php -r "unlink('composer-setup.php');" \
@@ -68,8 +70,6 @@ RUN chmod +x /var/www/.docker/dev/build.dev.sh
 RUN chmod +rwx /var/www
 
 RUN chmod -R 777 /var/www
-
-# RUN usermod -u 1000 www-data
 
 USER root
 
